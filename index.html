@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>For Atena ❤️</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}
+body{font-family:Arial,sans-serif;color:#f4b6d2}
+#intro{
+  position:fixed;inset:0;z-index:20;background:#000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:opacity .8s ease,visibility .8s ease
+}
+#intro.hide{opacity:0;visibility:hidden;pointer-events:none}
+#intro h1{font-size:48px;margin:0 0 10px;color:#f6a4c8;text-shadow:0 0 22px #ff4c9c}
+#intro p{font-size:15px;margin:0 0 25px;color:#ddd}
+#intro button{
+  border:1px solid #ff83b9;background:#ff3c92;color:#fff;
+  border-radius:30px;padding:12px 28px;font-size:16px;
+  box-shadow:0 0 25px #ff3c9270
+}
+.scene{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;perspective:900px}
+.heart3d{
+  width:min(92vw,520px);height:min(92vw,520px);
+  position:relative;transform-style:preserve-3d;
+  animation:wholeSpin 8s linear infinite, float 4s ease-in-out infinite;
+}
+.layer{position:absolute;inset:0;transform-style:preserve-3d}
+.txt{
+  position:absolute;left:50%;top:50%;
+  color:#e9a0bd;font-size:11px;font-weight:500;
+  line-height:1;white-space:nowrap;
+  text-shadow:0 0 6px #fff,0 0 11px #ff5ca4;
+  transform-origin:center center;
+}
+.txt.back{opacity:.32}
+.txt.mid{opacity:.62}
+.txt.front{opacity:.9}
+@keyframes wholeSpin{
+  0%{transform:rotateY(0deg) rotateZ(-3deg)}
+  50%{transform:rotateY(180deg) rotateZ(3deg)}
+  100%{transform:rotateY(360deg) rotateZ(-3deg)}
+}
+@keyframes float{50%{margin-top:-10px}}
+.caption{
+  position:absolute;left:0;right:0;bottom:8%;
+  text-align:center;font-size:15px;letter-spacing:5px;
+  color:#f4b6d2;text-shadow:0 0 14px #ff4c9c;
+}
+</style>
+</head>
+<body>
+
+<div id="intro">
+  <h1>Atena ❤️</h1>
+  <p>یه چیز کوچیک فقط برای تو...</p>
+  <button onclick="start()">بازش کن</button>
+</div>
+
+<div class="scene">
+  <div class="heart3d" id="heart">
+    <div class="layer" id="layer"></div>
+    <div class="caption">ONLY FOR ATENA</div>
+  </div>
+</div>
+
+<script>
+const layer=document.getElementById('layer');
+
+/*
+  دقیقاً چیزی که می‌خوای:
+  یک قلب توخالی که خودِ خط دور قلب از چندین ردیف
+  عبارت I LOVE YOU ساخته شده؛ هر عبارت روی مسیر قلب
+  می‌چرخد و کل قلب هم به صورت سه‌بعدی می‌چرخد.
+*/
+
+const cx=260, cy=245;
+const scale=11.2;
+
+// مختصات قلب استاندارد و زاویه مماس آن
+function heartPoint(t, s){
+  const x=16*Math.pow(Math.sin(t),3);
+  const y=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);
+  return {x:cx+x*s, y:cy-y*s};
+}
+function tangentAngle(t){
+  const e=0.002;
+  const a=heartPoint(t-e,scale), b=heartPoint(t+e,scale);
+  return Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI;
+}
+
+// چند ردیف موازی می‌سازیم تا مثل ریلز یک نوار ضخیم از I LOVE YOU شکل بگیرد
+const rows=[
+  {off:-13, cls:'back', z:-18},
+  {off:-8,  cls:'mid',   z:-8},
+  {off:-3,  cls:'front', z:0},
+  {off:3,   cls:'front', z:8},
+  {off:8,   cls:'mid',   z:15},
+  {off:13,  cls:'back',  z:22}
+];
+
+rows.forEach(row=>{
+  for(let i=0;i<105;i++){
+    const t=(i/105)*Math.PI*2;
+    const p=heartPoint(t,scale);
+    const a=tangentAngle(t);
+
+    const el=document.createElement('span');
+    el.className='txt '+row.cls;
+    el.textContent='I love you';
+
+    // offset عمود بر مسیر برای ایجاد ضخامت نوار
+    const rad=(a+90)*Math.PI/180;
+    const x=p.x+Math.cos(rad)*row.off;
+    const y=p.y+Math.sin(rad)*row.off;
+
+    el.style.transform=
+      `translate(-50%,-50%) translate3d(${x-cx}px,${y-cy}px,${row.z}px) rotate(${a}deg)`;
+
+    layer.appendChild(el);
+  }
+});
+
+function start(){
+  document.getElementById('intro').classList.add('hide');
+  if(navigator.vibrate) navigator.vibrate([25,35,25]);
+}
+</script>
+</body>
+</html>
